@@ -1,4 +1,4 @@
-'''DLP DQN Lab'''
+'''DLP Double DQN Lab'''
 __author__ = 'chengscott'
 __copyright__ = 'Copyright 2020, NCTU CGI Lab'
 import argparse
@@ -56,7 +56,7 @@ class Net(nn.Module):
         return y
 
 
-class DQN:
+class DoubleDQN:
     def __init__(self, args):
         self._behavior_net = Net().to(args.device)
         self._target_net = Net().to(args.device)
@@ -103,9 +103,9 @@ class DQN:
         ## TODO ##
         q_value = self._behavior_net(state).gather(1, action.long())
         with torch.no_grad():
-            q_next = self._target_net(next_state)
-            q_next, _ = torch.max(q_next, 1)
-            q_next = q_next.unsqueeze(1)
+            q_next_value = self._behavior_net(next_state)
+            next_action = torch.max(q_next_value, 1)[1].unsqueeze(1)
+            q_next = self._target_net(next_state).gather(1, next_action)
             q_target = reward + gamma * q_next * (1 - done)
         criterion = nn.MSELoss()
         loss = criterion(q_value, q_target)
@@ -212,8 +212,8 @@ def main():
     ## arguments ##
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-d', '--device', default='cuda')
-    parser.add_argument('-m', '--model', default='dqn.pth')
-    parser.add_argument('--logdir', default='log/dqn')
+    parser.add_argument('-m', '--model', default='double_dqn.pth')
+    parser.add_argument('--logdir', default='log/double_dqn')
     # train
     parser.add_argument('--warmup', default=10000, type=int)
     parser.add_argument('--episode', default=1200, type=int)
@@ -234,7 +234,7 @@ def main():
 
     ## main ##
     env = gym.make('LunarLander-v2')
-    agent = DQN(args)
+    agent = DoubleDQN(args)
     writer = SummaryWriter(args.logdir)
     if not args.test_only:
         train(args, env, agent, writer)
