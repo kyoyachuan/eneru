@@ -255,9 +255,9 @@ def train(args, env, agent, writer):
             if done:
                 ewma_reward = 0.05 * total_reward + (1 - 0.05) * ewma_reward
                 writer.add_scalar('Train/Episode Reward', total_reward,
-                                  total_steps)
+                                  episode)
                 writer.add_scalar('Train/Ewma Reward', ewma_reward,
-                                  total_steps)
+                                  episode)
                 print(
                     'Step: {}\tEpisode: {}\tLength: {:3d}\tTotal reward: {:.2f}\tEwma reward: {:.2f}'
                     .format(total_steps, episode, t, total_reward,
