@@ -131,3 +131,4 @@ dmypy.json
 # Artifacts
 log/*
 *.pth
+artifacts/*
