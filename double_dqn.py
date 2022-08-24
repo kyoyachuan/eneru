@@ -38,8 +38,7 @@ class ReplayMemory:
 class Net(nn.Module):
     def __init__(self, state_dim=8, action_dim=4, hidden_dim=32):
         super().__init__()
-        ## TODO ##
-        self.sequence = nn.Sequential(
+        self.net = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
             nn.ReLU(inplace=True),
 
@@ -50,10 +49,8 @@ class Net(nn.Module):
         )
 
     def forward(self, x):
-        ## TODO ##
         x = torch.tensor(x, device="cuda")
-        y = self.sequence(x)
-        return y
+        return self.net(x)
 
 
 class DoubleDQN:
@@ -62,8 +59,6 @@ class DoubleDQN:
         self._target_net = Net().to(args.device)
         # initialize target network
         self._target_net.load_state_dict(self._behavior_net.state_dict())
-        ## TODO ##
-        # self._optimizer = ?
         self._optimizer = optim.Adam(self._behavior_net.parameters(), lr=args.lr)
         # memory
         self._memory = ReplayMemory(capacity=args.capacity)
@@ -77,7 +72,6 @@ class DoubleDQN:
 
     def select_action(self, state, epsilon, action_space):
         '''epsilon-greedy based on behavior network'''
-        ## TODO ##
         if random.random() < epsilon:
             return action_space.sample()
         else:
@@ -100,7 +94,6 @@ class DoubleDQN:
         state, action, reward, next_state, done = self._memory.sample(
             self.batch_size, self.device)
 
-        ## TODO ##
         q_value = self._behavior_net(state).gather(1, action.long())
         with torch.no_grad():
             q_next_value = self._behavior_net(next_state)
@@ -117,7 +110,6 @@ class DoubleDQN:
 
     def _update_target_network(self):
         '''update target network by copying from behavior network'''
-        ## TODO ##
         self._target_net.load_state_dict(self._behavior_net.state_dict())
 
     def save(self, model_path, checkpoint=False):
@@ -190,7 +182,6 @@ def test(args, env, agent, writer):
         total_reward = 0
         env.seed(seed)
         state = env.reset()
-        ## TODO ##
         with torch.no_grad():
             done = 0
             while not done:
@@ -199,10 +190,8 @@ def test(args, env, agent, writer):
                 state = next_state
                 total_reward += reward
 
-                if done:
-                    writer.add_scalar('Test/Episode Reward', total_reward, n_episode)
-                    rewards.append(total_reward)
-                    break
+            rewards.append(total_reward)
+
         print(total_reward)
     print('Average Reward', np.mean(rewards))
     env.close()
